@@ -14,4 +14,11 @@ public final class Constants {
 
     public static final String GMAIL_VENDOR_NAME = "gmail";
 
+
+    /**
+     * Since I failed to fetch the hosts etc from application.conf, fetching it from class constants..
+     * For security, the passwords will be fetched, however, from the env variables.
+     */
+
+    gmail_
 }

@@ -9,9 +9,13 @@ import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import play.api.Play;
 
 public class EmailController extends Controller {
 
@@ -23,6 +27,24 @@ public class EmailController extends Controller {
         this.emailService = emailService;
     }
 
+
+    public Result appendCSV(){
+
+
+            public class CsvExporter {
+                public static void exportToCsv(List<Event> events, String filePath) {
+                    try (FileWriter writer = new FileWriter(filePath)) {
+                        writer.append("Event Size,Timestamp\n"); // Header
+                        for (MailingEvent event : events) {
+                            writer.append(event.getSize()).append(",")
+                                    .append(event.getTimestamp().toString()).append("\n");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     public CompletionStage<Result> sendEmail(Http.Request request) {
 
         JsonNode json = request.body().asJson();
@@ -42,7 +64,13 @@ public class EmailController extends Controller {
           //  EmailConfig config = new EmailConfig(to);
             logger.info("Attempt sending mail to:{}",to);
             return emailService.sendEmail(from, to, subject, body)
-                    .thenApply(done -> ok(Json.toJson("Email sent successfully")))
+                    .thenApply(done ->
+
+                            List<Event> events = new ArrayList<>();
+            events.add(new Event("Event 1"));
+            events.add(new Event("Event 2"));
+            exportToCsv(events, "events.csv");
+                            ok(Json.toJson("Email sent successfully")))
                     .exceptionally(ex -> internalServerError("Error sending email: " + ex.getMessage()));
         } catch (Exception e) {
             return CompletableFuture.completedFuture(internalServerError("Failed to send email, Error sending email: " + e.getMessage()));
