@@ -6,12 +6,12 @@ import java.util.Properties;
 import model.Constants;
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerClient;
-import play.api.Configuration;
+import bl.*;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,24 +92,39 @@ public class EmailService {
         return properties;
     }
 
-    // CompletionStage<Void>
-    public void sendEmail(String from, String to, String subject, String body) throws Exception {
-        return { /// CompletableFuture.runAsync(() -> {
+    public Boolean recordSendingEmail(EmailWrapper email){
+        boolean isSuccess = false;
+        try {
+            LogEventsList.addEventLog(email.getEmailSize());
+            isSuccess = true;
+        }catch(Exception e){
+            logger.error("Failed to record sending email of subject:{}",email.getSubject(),",error:{}",e.getMessage());
+            isSuccess = false;
+        }
+
+        return isSuccess;
+    }
+
+    //
+    public CompletableFuture<Void> sendEmail(EmailWrapper email) throws Exception {
+         return CompletableFuture.runAsync(() -> {
             try {
-                sendEmailInternal(from, to, subject, body);
+                sendEmailInternal(email);
+                recordSendingEmail(email);
             } catch (Exception e) {
-                throw new RuntimeException(e); // or handle it in another way
+                logger.error("Error sending email occurred, aborting. subject:{}",email.getSubject(),",error:{}",e.getMessage());
+                throw new RuntimeException(e);
             }
         });
     }
 
     // CompletionStage<Void>
-    private void sendEmailInternal(String from,String to, String subject, String body) throws Exception{
+    private  CompletableFuture<Void> sendEmailInternal(EmailWrapper emailWrapper) throws Exception{
         return CompletableFuture.runAsync(() -> {
             try{
 
-                logger.info("sendEmailInternal to:{}",to);
-            AbstractVendor vendor = VendorFactory.createVendor(to);
+            logger.info("sendEmailInternal to:{}",emailWrapper.getTo());
+            AbstractVendor vendor = VendorFactory.createVendor(emailWrapper.getTo());
 
             Properties properties = getProperties(vendor);
 
@@ -128,17 +143,17 @@ public class EmailService {
                 Message mimeMessage = new MimeMessage(session);
 
                 // Set From, To, Subject, and the message body
-                mimeMessage.setFrom(new InternetAddress(from));
+                mimeMessage.setFrom(new InternetAddress(emailWrapper.getFrom()));
 
                 if (smtpHost != null) {
 
-                    logger.info("smtpHost:{}",smtpHost,", subject:{}",subject,",body:{}",body,",from:",from);
+                    logger.info("smtpHost:{}",smtpHost,", subject:{}",emailWrapper.getSubject(),",body:{}",emailWrapper.getBody(),",from:",emailWrapper.getFrom());
                     // Set up your email with the correct SMTP host
                     Email email = new Email()
-                            .setSubject(subject)
-                            .setFrom(from)
-                            .addTo(to)
-                            .setBodyHtml(body);
+                            .setSubject(emailWrapper.getSubject())
+                            .setFrom(emailWrapper.getFrom())
+                            .addTo(emailWrapper.getTo())
+                            .setBodyHtml(emailWrapper.getBody());
 
                     // This is where you would configure the mailerClient if needed
                     mailerClient.send(email);

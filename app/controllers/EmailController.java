@@ -2,9 +2,10 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import play.libs.Json;
+import play.libs.mailer.Email;
 import play.mvc.*;
 import services.EmailService;
-
+import java.io.File;
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -17,7 +18,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import model.*;
+import bl.*;
+
 public class EmailController extends Controller {
+
 
     final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final EmailService emailService;
@@ -27,24 +32,16 @@ public class EmailController extends Controller {
         this.emailService = emailService;
     }
 
+    public Result downloadCsv() {
+        String filePath = Constants.MAILING_EVENTS_FILE;
+        String csvFilePath = LogEventsList.exportEventsToCsv(filePath);
 
-    public Result appendCSV(){
-
-
-            public class CsvExporter {
-                public static void exportToCsv(List<Event> events, String filePath) {
-                    try (FileWriter writer = new FileWriter(filePath)) {
-                        writer.append("Event Size,Timestamp\n"); // Header
-                        for (MailingEvent event : events) {
-                            writer.append(event.getSize()).append(",")
-                                    .append(event.getTimestamp().toString()).append("\n");
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+        if (csvFilePath != null) {
+            return ok(new File(csvFilePath));
+        } else {
+            return internalServerError("Failed to create CSV file.");
         }
+    }
     public CompletionStage<Result> sendEmail(Http.Request request) {
 
         JsonNode json = request.body().asJson();
@@ -60,18 +57,11 @@ public class EmailController extends Controller {
             return CompletableFuture.completedFuture(badRequest("Missing parameters"));
         }
         try {
-            //    Play.current.configuration.getString("db.driver");
-          //  EmailConfig config = new EmailConfig(to);
             logger.info("Attempt sending mail to:{}",to);
-            return emailService.sendEmail(from, to, subject, body)
-                    .thenApply(done ->
-
-                            List<Event> events = new ArrayList<>();
-            events.add(new Event("Event 1"));
-            events.add(new Event("Event 2"));
-            exportToCsv(events, "events.csv");
-                            ok(Json.toJson("Email sent successfully")))
-                    .exceptionally(ex -> internalServerError("Error sending email: " + ex.getMessage()));
+            EmailWrapper email = new EmailWrapper(subject, body,from, to);
+            return emailService.sendEmail(email)
+                            .thenApply(done ->
+                                    ok(Json.toJson("Email from:"+email.getFrom()+" was sent successfully"))).exceptionally(ex -> internalServerError("Error sending email: " + ex.getMessage()));
         } catch (Exception e) {
             return CompletableFuture.completedFuture(internalServerError("Failed to send email, Error sending email: " + e.getMessage()));
         }
