@@ -1,5 +1,13 @@
 package model;
 
+/**
+ * Abstract class to implement factory design pattern,
+ * Represents a vendor prototype.
+ *
+ * @author Shiri Rave
+ * @date 13/05/2025
+ */
+
 public abstract class AbstractVendor {
 
     private String vendorName;

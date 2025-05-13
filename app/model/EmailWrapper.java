@@ -2,6 +2,9 @@ package model;
 
 /**
  * Class to represent email object with required fields - subject, body, from, to
+ *
+ * @author Shiri Rave
+ * @date 13/05/2025
  */
 public class EmailWrapper {
 

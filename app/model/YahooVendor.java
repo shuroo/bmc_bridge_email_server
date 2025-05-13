@@ -1,9 +1,14 @@
 package model;
 
+/**
+ * Class to represent the Yahoo Vendor.
+ *
+ * @author Shiri Rave
+ * @date 13/05/2025
+ */
 public class YahooVendor extends AbstractVendor{
 
     String vendorName = Constants.YAHOO_VENDOR_NAME; //'yahoo';
-
 
     @Override
     public void setVendorName(String vendorName){

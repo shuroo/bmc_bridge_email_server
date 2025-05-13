@@ -6,6 +6,9 @@ import java.time.format.DateTimeFormatter;
  * Class to describe creating an e-mail record in some storage, for later exporting them as csv.
  * In real life, this should be stored in a database or in s3 ( aws bucket ),
  * but here, for simplicity, it is stored in-memory.
+
+ * @author Shiri Rave
+ * @date 13/05/2025
  */
 public class EventLog {
 

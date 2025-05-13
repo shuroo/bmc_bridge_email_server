@@ -3,9 +3,13 @@ package controllers;
 import play.mvc.*;
 
 /**
- * This controller contains an action to handle HTTP requests
- * to the application's home page.
+ * This is the default play controller, display default view in endpoint "localhost:9000/"
+ * Customised according to the exercise.
+ *
+ *  @author Shiri Rave
+ *  @date 13/05/2025
  */
+
 public class HomeController extends Controller {
 
     /**

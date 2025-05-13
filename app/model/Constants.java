@@ -2,6 +2,9 @@ package model;
 
 /**
  * Class to manage and use string constants such has, properties keys etc.
+ *
+ * @author Shiri Rave
+ * @date 13/05/2025
  */
 public final class Constants {
 
@@ -39,6 +42,8 @@ public final class Constants {
     public static final String TLS_SUFFIX =".tls";
 
     public static final String JBEX_TRANSPORT ="jbexTransport";
+
+    public static final String CSV_HEADER ="timestamp_utc;size_kb\n";
 
 
 

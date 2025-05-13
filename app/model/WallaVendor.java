@@ -1,5 +1,11 @@
 package model;
 
+/**
+ * Class to represent the Walla Vendor.
+ *
+ * @author Shiri Rave
+ * @date 13/05/2025
+ */
 public class WallaVendor extends AbstractVendor{
 
     String vendorName = Constants.WALLA_VENDOR_NAME; //'walla';
