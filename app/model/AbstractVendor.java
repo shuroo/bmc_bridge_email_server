@@ -2,27 +2,35 @@ package model;
 
 public abstract class AbstractVendor {
 
-    String vendorName;
-    String configPrefix;
+    private String vendorName;
+    private String configPrefix;
 
 
-    protected AbstractVendor(String vendorName) throws RuntimeException{
-        this.vendorName = vendorName;
+    public AbstractVendor(String vendorName) throws RuntimeException{
+        setVendorName(vendorName);
         this.configPrefix = buildConfigPrefix();
     }
 
+
+    protected void setVendorName(String vendorName){
+        this.vendorName = vendorName;
+    }
+
     private String buildConfigPrefix() throws RuntimeException{
-        if(vendorName.isEmpty()){
+        if(getVendorName().isEmpty()){
             throw new RuntimeException("Illegal vendor name, aborting.");
         }
-        return "mail."+vendorName;
+        StringBuilder sb = new StringBuilder();
+        sb.append(Constants.MAIL_PREFIX);
+        sb.append(getVendorName());
+        return sb.toString();
     }
 
     public String getConfigPrefix(){
         return this.configPrefix;
     }
 
-    public String getVendorName(){
+    protected String getVendorName(){
         return this.vendorName;
     }
 
